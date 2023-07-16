@@ -9,8 +9,14 @@
         "description": "Name used as base-template to name the resources to be deployed in Azure."
       }
     },
-    "location": {
-      "defaultValue": "centralus",
+    "existingSWAName": {
+      "type": "string",
+      "defaultValue": "SKIP-THIS-RESOURCE",
+      "metadata": {
+        "description": "Optional (SKIP-THIS-RESOURCE): If provided, this is name of the the already created Static Web App in this resource group. If not provided: API will be standalone"
+      }
+    },
+    "swaLocation": {
       "allowedValues": [
         "centralus",
         "eastus2",
@@ -18,14 +24,7 @@
       ],
       "type": "string",
       "metadata": {
-        "description": "Location to deploy resources."
-      }
-    },
-    "existingSWAName": {
-      "type": "string",
-      "defaultValue": "SKIP-THIS-RESOURCE",
-      "metadata": {
-        "description": "Optional (SKIP-THIS-RESOURCE): If provided, this is name of the the already created Static Web App in this resource group. If not provided: API will be standalone"
+        "description": "Static Web App location."
       }
     },
     "defaultRedirectUrl": {
@@ -78,7 +77,7 @@
       "name": "[variables('funcAppName')]",
       "type": "Microsoft.Web/sites",
       "kind": "functionapp",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "tags": {
         "environment": "[parameters('Environment')]"
       },
@@ -170,7 +169,7 @@
       "apiVersion": "2021-03-01",
       "name": "[variables('funcHhostingPlanName')]",
       "type": "Microsoft.Web/serverfarms",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "kind": "",
       "tags": {
         "environment": "[parameters('Environment')]"
@@ -188,7 +187,7 @@
       "apiVersion": "2015-05-01",
       "name": "[variables('insightsAppName')]",
       "type": "Microsoft.Insights/components",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "tags": {
         "environment": "[parameters('Environment')]"
       },
@@ -202,7 +201,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "apiVersion": "2019-06-01",
       "sku": {
         "name": "Standard_LRS",
@@ -220,7 +219,7 @@
       "condition": "[equals(toLower(variables('deployTinyBlazorAdmin')), 'true')]",
       "type": "Microsoft.Web/staticSites",
       "name": "[variables('swaName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('swaLocation')]",
       "apiVersion": "2022-03-01",
       "sku": {
         "name": "Standard",
@@ -253,7 +252,7 @@
           ],
           "properties": {
             "backendResourceId": "[resourceId('Microsoft.Web/sites/', variables('funcAppName'))]",
-            "region": "[parameters('location')]"
+            "region": "[resourceGroup().location]"
           }
         },
         {
@@ -267,7 +266,7 @@
           ],
           "properties": {
             "functionAppResourceId": "[resourceId('Microsoft.Web/sites/', variables('funcAppName'))]",
-            "functionAppRegion": "[parameters('location')]"
+            "functionAppRegion": "[resourceGroup().location]"
           }
         }
       ]
