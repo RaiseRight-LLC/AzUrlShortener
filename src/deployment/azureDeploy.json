@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": {
-      "defaultValue": "shortenertool",
+      "defaultValue": "GLSC-dev-urlshortener",
       "type": "string",
       "metadata": {
         "description": "Name used as base-template to name the resources to be deployed in Azure."
@@ -11,7 +11,7 @@
     },
     "existingSWAName": {
       "type": "string",
-      "defaultValue": "SKIP-THIS-RESOURCE",
+      "defaultValue": "GLSC-dev-urlshortener-swa",
       "metadata": {
         "description": "Optional (SKIP-THIS-RESOURCE): If provided, this is name of the the already created Static Web App in this resource group. If not provided: API will be standalone"
       }
@@ -28,7 +28,7 @@
       }
     },
     "defaultRedirectUrl": {
-      "defaultValue": "https://azure.com",
+      "defaultValue": "https://devaz.raiseright.com",
       "type": "string",
       "metadata": {
         "description": "Default URL used when key passed by the user is not found."
@@ -36,7 +36,7 @@
     },
     "GitHubURL": {
       "type": "string",
-      "defaultValue": "https://github.com/microsoft/AzUrlShortener.git",
+      "defaultValue": "https://github.com/RaiseRight-LLC/AzUrlShortener.git",
       "metadata": {
         "description": "The URL of GitHub (ending by .git)"
       }
@@ -63,13 +63,13 @@
     }
   },
   "variables": {
-    "suffix": "[substring(toLower(uniqueString(resourceGroup().id, resourceGroup().location)),0,5)]",
-    "funcAppName": "[toLower(concat(parameters('baseName'), '-', variables('suffix'), '-fa'))]",
+    "funcAppName": "[toLower(concat(parameters('baseName'), '-fa'))]",
     "swaName": "[parameters('existingSWAName')]",
     "deployTinyBlazorAdmin": "[if(equals(parameters('existingSWAName'), 'SKIP-THIS-RESOURCE'), 'false', 'true')]",
-    "storageAccountName": "[tolower(concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),16)), variables('suffix'), 'sa'))]",
-    "funcHhostingPlanName": "[concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),13)), '-', variables('suffix'), '-asp')]",
-    "insightsAppName": "[concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),13)), '-', variables('suffix'), '-ai')]"
+    "storageAccountName": "glscdevurlshortenersa",
+    "funcHostingPlanName": "[concat(parameters('baseName'), '-asp')]",
+    "insightsAppName": "[concat(parameters('baseName'), '-ai')]",
+    "websiteContentShare": "glscdevurlshortenerwcs"
   },
   "resources": [
     {
@@ -83,7 +83,7 @@
       },
       "dependsOn": [
         "[concat('microsoft.insights/components/', variables('insightsAppName'))]",
-        "[concat('Microsoft.Web/serverfarms/', variables('funcHhostingPlanName'))]",
+        "[concat('Microsoft.Web/serverfarms/', variables('funcHostingPlanName'))]",
         "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountName'))]"
       ],
       "properties": {
@@ -116,7 +116,7 @@
             },
             {
               "name": "WEBSITE_CONTENTSHARE",
-              "value": "[concat(variables('funcAppName'), 'ba91')]"
+              "value": "[variables('websiteContentShare')]"
             },
             {
               "name": "DataStorage",
@@ -128,7 +128,7 @@
             }
           ]
         },
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('funcHhostingPlanName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('funcHostingPlanName'))]",
         "use32BitWorkerProcess": true,
         "netFrameworkVersion": "v6.0",
         "clientAffinityEnabled": true
@@ -167,7 +167,7 @@
     },
     {
       "apiVersion": "2021-03-01",
-      "name": "[variables('funcHhostingPlanName')]",
+      "name": "[variables('funcHostingPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
       "kind": "",
@@ -175,7 +175,7 @@
         "environment": "[parameters('Environment')]"
       },
       "properties": {
-        "name": "[variables('funcHhostingPlanName')]",
+        "name": "[variables('funcHostingPlanName')]",
         "computeMode": "Dynamic"
       },
       "sku": {
