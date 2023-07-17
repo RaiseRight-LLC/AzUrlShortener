@@ -69,7 +69,7 @@
 			"response": []
 		},
 		{
-			"name": "Create / Update Url",
+			"name": "Create Url",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -78,13 +78,35 @@
 					"raw": "{\r\n    \"Vanity\": \"goo2\",\r\n    \"Title\": \"Google\",\r\n    \"Url\": \"https://www.google.com\",\r\n    \"Schedules\": []\r\n}"
 				},
 				"url": {
-					"raw": "{{BaseUrl}}/api/UrlUpsert",
+					"raw": "{{BaseUrl}}/api/UrlCreate",
 					"host": [
 						"{{BaseUrl}}"
 					],
 					"path": [
 						"api",
-						"UrlUpsert"
+						"UrlCreate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Url",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Vanity\": \"goo2\",\r\n    \"Title\": \"Google\",\r\n    \"Url\": \"https://www.google.com\",\r\n    \"Schedules\": []\r\n}"
+				},
+				"url": {
+					"raw": "{{BaseUrl}}/api/UrlUpdate",
+					"host": [
+						"{{BaseUrl}}"
+					],
+					"path": [
+						"api",
+						"UrlUpdate"
 					]
 				}
 			},
@@ -113,6 +135,28 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Functions-Key",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "BaseUrl",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
