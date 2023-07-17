@@ -9,6 +9,13 @@
         "description": "Name used as base-template to name the resources to be deployed in Azure."
       }
     },
+    "baseNameNoSpecialChars": {
+      "defaultValue": "glscdevurlshortener",
+      "type": "string",
+      "metadata": {
+        "description": "Name, without special characters and all lower-case, used as base-template to name the resources to be deployed in Azure."
+      }
+    },
     "existingSWAName": {
       "type": "string",
       "defaultValue": "GLSC-dev-urlshortener-swa",
@@ -53,12 +60,19 @@
       "allowedValues": [
         "dev",
         "qa",
-        "staging",
+        "stg",
         "prod"
       ],
       "type": "string",
       "metadata": {
         "description": "Environment tag to be added for these resources."
+      }
+    },
+    "CustomDomain": {
+      "type": "string",
+      "defaultValue": "NONE",
+      "metadata": {
+        "description": "Optional: Custom Domain that will be used in shortened urls, NONE will use the default Function url. Using a custom domain requires additional work to add it to the function after deployment, setting it here is only for config settings."
       }
     }
   },
@@ -66,10 +80,12 @@
     "funcAppName": "[toLower(concat(parameters('baseName'), '-fa'))]",
     "swaName": "[parameters('existingSWAName')]",
     "deployTinyBlazorAdmin": "[if(equals(parameters('existingSWAName'), 'SKIP-THIS-RESOURCE'), 'false', 'true')]",
-    "storageAccountName": "glscdevurlshortenersa",
+    "storageAccountName": "[toLower(concat(parameters('baseNameNoSpecialChars'), 'sa')])",
     "funcHostingPlanName": "[concat(parameters('baseName'), '-asp')]",
     "insightsAppName": "[concat(parameters('baseName'), '-ai')]",
-    "websiteContentShare": "glscdevurlshortenerwcs"
+    "websiteContentShare": "[toLower(concat(parameters('baseNameNoSpecialChars'), 'wcs')])",
+    "useCustomDomain": "[if(equals(parameters('CustomDomain'), 'NONE'), 'false', 'true')]",
+    "swaCustomDomain": "[if(equals(variables('useCustomDomain'), 'true'), reference(resourceId('Microsoft.Web/sites', variables('funcAppName')), '2018-02-01').defaultHostName, parameters('CustomDomain'))]"
   },
   "resources": [
     {
@@ -125,6 +141,11 @@
             {
               "name": "defaultRedirectUrl",
               "value": "[parameters('defaultRedirectUrl')]"
+            },
+            {
+              "condition": "[equals(toLower(variables('useCustomDomain')), 'true')]",
+              "name": "CustomDomain",
+              "value": "[parameters('CustomDomain')]"
             }
           ]
         },
@@ -145,6 +166,7 @@
             "repoUrl": "[parameters('GitHubURL')]",
             "branch": "[parameters('GitHubBranch')]",
             "IsManualIntegration": true
+            }
           }
         }
       ]
@@ -278,10 +300,12 @@
       "name": "[format('{0}/{1}', variables('swaName'), 'appsettings')]",
       "properties": {
         "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(concat('microsoft.insights/components/', variables('insightsAppName')), '2015-05-01').InstrumentationKey]",
-        "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(concat('microsoft.insights/components/', variables('insightsAppName')), '2015-05-01').InstrumentationKey]"
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(concat('microsoft.insights/components/', variables('insightsAppName')), '2015-05-01').InstrumentationKey]",
+        "CustomDomain": "[variables('swaCustomDomain')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/staticSites', variables('swaName'))]"
+        "[resourceId('Microsoft.Web/staticSites', variables('swaName'))]",
+        "[resourceId('Microsoft.Web/sites/', variables('funcAppName'))]"
       ]
     }
   ],
