@@ -2,10 +2,16 @@ name: Azure Static Web Apps CI/CD
 
 on:
   push:
+    paths:
+      - 'src/Cloud5mins.ShortenerTools.TinyBlazorAdmin/**'
+      - '.github/workflows/azure-static-web-apps-proud-hill-0f07e9810.yml'
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'src/Cloud5mins.ShortenerTools.TinyBlazorAdmin/**'
+      - '.github/workflows/azure-static-web-apps-proud-hill-0f07e9810.yml'
     branches:
       - main
 
